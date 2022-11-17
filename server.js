@@ -2,8 +2,13 @@ var net = require("net");
 var utils = require("./utils/utils.js")
 var connectionArr = {};
 var id;
+var AWS = require('aws-sdk');
+AWS.config.update({region: 'ap-south-1'});
+var sqs = new AWS.SQS();
 var connectionArr = {};
 var tcpServer = net.createServer(handlerLotin).listen(1338);
+
+var deviceDataObj = {};
 
 function handlerLotin(connection){
   console.log("connection ESTAB");
@@ -23,13 +28,15 @@ function handlerLotin(connection){
     console.log(err.stack)
   });
   connection.on('data', function (data) {
-    //data = "7e02000038784087664106013c00000000000c000101b02fbb048bd2aa00ee0000000022110614335701040001a33b01040001a33b03020000300199310106250400000000537e";
+    data = "7e02000038784087664106013c00000000000c000101b02fbb048bd2aa00ee0000000022110614335701040001a33b01040001a33b03020000300199310106250400000000537e";
     try{
-      data = data.toString('hex');
-      console.log(data);
-      console.log('Data length ',data.length);
-      var deviceDataObj = {};
+      // data = data.toString('hex');
+      // console.log(data);
+      // console.log('Data length ',data.length);
+      console.log('--outt if----')
+      console.log('--data.slice(0, 2)--', data.slice(0, 2))
       if(data.slice(0, 2).toLowerCase() == '7e' ){
+        console.log('--if----')
         if(parseInt(data.slice(2, 4),16) == 2){
            deviceDataObj['identifier'] = data.slice(0, 2);
            deviceDataObj['locationPacketType'] = parseInt(data.slice(2, 4),16);
@@ -77,6 +84,23 @@ function handlerLotin(connection){
            deviceDataObj['numberofSatelite'] = parseInt(data.slice(124, 126),16);
            console.log('deviceDataObj', deviceDataObj);
            console.log('now insert into database');
+
+
+           
+           console.log('-----------------------------------------------------')
+           var params = {
+            MessageBody: JSON.stringify(deviceDataObj),
+            QueueUrl: "https://sqs.ap-south-1.amazonaws.com/547686973061/video-telematics"
+           };
+           
+           sqs.sendMessage(params, function(err, data) {
+            if (err) {
+              console.log("Error", err);
+            } else {
+              console.log("Success", data.MessageId);
+              console.log('--SQS--->', data)
+            }
+           });
         }
      }
     }catch(e){
@@ -84,6 +108,8 @@ function handlerLotin(connection){
     }
   });
 }
+
+
 
 
 
