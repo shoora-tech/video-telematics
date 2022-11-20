@@ -107,7 +107,7 @@ function handlerLotin(connection){
 
            let sqsData = await readFromSQS();
            console.log('sqsData--', sqsData)
-            insertSQSDataInDB(sqsData)
+            await insertSQSDataInDB(sqsData)
         }
      }
     }catch(e){
@@ -140,7 +140,6 @@ function readFromSQS(){
 }
 
 async function insertSQSDataInDB(data){
-     console.log('--insertSQSDataInDB---', data)
     const sequelize = new Sequelize(DB_DETAILS.database, DB_DETAILS.username, DB_DETAILS.password, {
         host: DB_DETAILS.endpoint,
         dialect: 'postgres'
