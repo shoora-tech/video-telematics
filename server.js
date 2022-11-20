@@ -3,13 +3,24 @@ var utils = require("./utils/utils.js")
 var connectionArr = {};
 var id;
 var AWS = require('aws-sdk');
+const { resolve } = require("path");
 AWS.config.update({region: 'ap-south-1'});
 var sqs = new AWS.SQS();
+const queryURL = "https://sqs.ap-south-1.amazonaws.com/547686973061/video-telematics";
 var connectionArr = {};
 var tcpServer = net.createServer(handlerLotin).listen(1338);
-
 var deviceDataObj = {};
 
+const sequelize = require('sequelize')
+const {Sequelize, DataTypes} = require("sequelize");
+ const DB_DETAILS = {
+     "database":"shoora_fleet_management",
+     "username":"shoora",
+     "password":"A406bsNRtFBLne5wriIQ",
+     "auth_type":"password authentication",
+     "endpoint": "shoora.crpd6o4smocv.ap-south-1.rds.amazonaws.com",
+     "port": "5432"
+ }
 function handlerLotin(connection){
   console.log("connection ESTAB");
   tcpServer.getConnections(function (error, count) {
@@ -27,16 +38,11 @@ function handlerLotin(connection){
     console.log("Caught flash policy server socket error: ");
     console.log(err.stack)
   });
-  connection.on('data', function (data) {
-    data = "7e02000038784087664106013c00000000000c000101b02fbb048bd2aa00ee0000000022110614335701040001a33b01040001a33b03020000300199310106250400000000537e";
+  connection.on('data',async function (data) {
+    // data = "7e02000038784087664106013c00000000000c000101b02fbb048bd2aa00ee0000000022110614335701040001a33b01040001a33b03020000300199310106250400000000537e";
     try{
-      // data = data.toString('hex');
-      // console.log(data);
-      // console.log('Data length ',data.length);
-      console.log('--outt if----')
-      console.log('--data.slice(0, 2)--', data.slice(0, 2))
+        data = data.toString('hex');
       if(data.slice(0, 2).toLowerCase() == '7e' ){
-        console.log('--if----')
         if(parseInt(data.slice(2, 4),16) == 2){
            deviceDataObj['identifier'] = data.slice(0, 2);
            deviceDataObj['locationPacketType'] = parseInt(data.slice(2, 4),16);
@@ -85,12 +91,9 @@ function handlerLotin(connection){
            console.log('deviceDataObj', deviceDataObj);
            console.log('now insert into database');
 
-
-           
-           console.log('-----------------------------------------------------')
            var params = {
             MessageBody: JSON.stringify(deviceDataObj),
-            QueueUrl: "https://sqs.ap-south-1.amazonaws.com/547686973061/video-telematics"
+            QueueUrl: queryURL
            };
            
            sqs.sendMessage(params, function(err, data) {
@@ -101,6 +104,10 @@ function handlerLotin(connection){
               console.log('--SQS--->', data)
             }
            });
+
+           let sqsData = await readFromSQS();
+           console.log('sqsData--', sqsData)
+            insertSQSDataInDB(sqsData)
         }
      }
     }catch(e){
@@ -108,6 +115,128 @@ function handlerLotin(connection){
     }
   });
 }
+
+
+function readFromSQS(){
+    return new Promise((resolve, reject) => {
+        const params = {
+            QueueUrl: queryURL,
+            MaxNumberOfMessages: 1,
+            VisibilityTimeout: 0,
+            WaitTimeSeconds: 0
+        };
+        sqs.receiveMessage(params, (err, data) => {
+            if (err) {
+                reject(err, err.stack);
+            } else {
+                if (!data.Messages) {
+                    resolve('Nothing to process');
+                }
+                const sqsData = JSON.parse(data.Messages[0].Body);
+                resolve(sqsData)
+            }
+        })
+    })
+}
+
+async function insertSQSDataInDB(data){
+     console.log('--insertSQSDataInDB---', data)
+    const sequelize = new Sequelize(DB_DETAILS.database, DB_DETAILS.username, DB_DETAILS.password, {
+        host: DB_DETAILS.endpoint,
+        dialect: 'postgres'
+    });
+
+    const Device = sequelize.define('device_data_details', {
+        // attributes
+        id: {
+            type: Sequelize.UUID,
+            defaultValue: Sequelize.UUIDV4,
+            primaryKey: true,
+        },
+        location_packet_type: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        message_body_length: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        imei: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        message_serial_number: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        alarm_series: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        terminal_status: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        ignition_status: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        latitude: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        longitude: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        height: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        speed: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        directions: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        oraganization: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+
+    });
+
+    try {
+        await sequelize.authenticate();
+        await sequelize.sync({alter: true})
+        console.log('Connection has been established successfully.');
+
+        const resultData = await Device.create({
+            "identifier":data.identifier,
+            "location_packet_type": data.locationPacketType,
+            "message_body_length": data.messageBodyLength,
+            "imei":data.phoneNumber,
+            "message_serial_number":data.msgSerialNumber,
+            "alarm_series":data.alarmSeries,
+            "terminal_status":data.terminalStatus,
+            "ignition_status": data.ignitionStatus,
+            "latitude":data.latitute,
+            "longitude":data.longitute,
+            "height":data.height,
+            "speed":data.speed,
+            "directions":data.direction,
+            "oraganization":"oraganization"
+        });
+
+    } catch (error) {
+        console.error('Something went Wrong :', error);
+    }
+
+}
+
+
 
 
 
