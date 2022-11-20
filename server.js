@@ -228,6 +228,7 @@ async function insertSQSDataInDB(data){
             "directions":data.direction,
             "oraganization":"oraganization"
         });
+        return true;
 
     } catch (error) {
         console.error('Something went Wrong :', error);
