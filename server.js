@@ -4,7 +4,14 @@ var connectionArr = {};
 var id;
 var AWS = require('aws-sdk');
 const { resolve } = require("path");
-AWS.config.update({region: 'ap-south-1'});
+
+AWS.config.update({
+    region: 'ap-south-1',
+    accessKeyId: 'AKIAX7BFP72C6Z774WVT',
+    secretAccessKey: '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',
+    endpoint: new AWS.Endpoint('https://sqs.ap-south-1.amazonaws.com/'),
+});
+
 var sqs = new AWS.SQS();
 const queryURL = "https://sqs.ap-south-1.amazonaws.com/547686973061/video-telematics";
 var connectionArr = {};
