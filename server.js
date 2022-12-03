@@ -106,8 +106,7 @@ function handlerLotin(connection){
             if (err) {
               console.log("Error", err);
             } else {
-              console.log("Success", data.MessageId);
-              console.log('--SQS--->', data)
+              
             }
            });
 
