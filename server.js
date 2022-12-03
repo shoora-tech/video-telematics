@@ -49,6 +49,7 @@ function handlerLotin(connection){
     // data = "7e02000038784087664106013c00000000000c000101b02fbb048bd2aa00ee0000000022110614335701040001a33b01040001a33b03020000300199310106250400000000537e";
     try{
         data = data.toString('hex');
+        console.log('Data from device--->',data);
       if(data.slice(0, 2).toLowerCase() == '7e' ){
         if(parseInt(data.slice(2, 4),16) == 2){
            deviceDataObj['identifier'] = data.slice(0, 2);
