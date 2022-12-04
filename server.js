@@ -53,6 +53,7 @@ function handlerLotin(connection){
     // data = "7e02000038784087664106013c00000000000c000101b02fbb048bd2aa00ee0000000022110614335701040001a33b01040001a33b03020000300199310106250400000000537e";
     try{
         data = data.toString('hex');
+        console.log('Data from device--->',data);
       if(data.slice(0, 2).toLowerCase() == '7e' ){
         if(parseInt(data.slice(2, 4),16) == 2){
            deviceDataObj['uuid'] = randomUUID();
@@ -103,8 +104,6 @@ function handlerLotin(connection){
            //deviceDataObj['unknownadditionalInfLength'] = parseInt(data.slice(96, 98),16);
            deviceDataObj['gsmNetworkStrength'] = parseInt(data.slice(98, 102),16);
            deviceDataObj['numberofSatelite'] = parseInt(data.slice(124, 126),16);
-           console.log('deviceDataObj', deviceDataObj);
-           console.log('now insert into database');
 
            var params = {
             MessageBody: JSON.stringify(deviceDataObj),
@@ -115,13 +114,11 @@ function handlerLotin(connection){
             if (err) {
               console.log("Error", err);
             } else {
-              console.log("Success", data.MessageId);
-              console.log('--SQS--->', data)
+              
             }
            });
 
            let sqsData = await readFromSQS();
-           console.log('sqsData--', sqsData)
             await insertSQSDataInDB(sqsData)
         }
      }
@@ -225,7 +222,6 @@ async function insertSQSDataInDB(data){
     try {
         await sequelize.authenticate();
         await sequelize.sync({alter: true})
-        console.log('Connection has been established successfully.');
 
         const resultData = await Device.create({
             "identifier":data.identifier,

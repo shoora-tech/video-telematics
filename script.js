@@ -31,7 +31,7 @@ var params = {
 //READ Request Handlers
 app.get('/', async (req, res) => {
     let sqsData = await readFromSQS();
-    console.log('sqsData--', sqsData)
+    //console.log('sqsData--', sqsData)
     res.send('Welcome to Tutorial!!'+JSON.stringify(sqsData));
 });
 
@@ -42,8 +42,8 @@ app.get('/sendMessage', async (req, res) => {
         if (err) {
             console.log("Error", err);
         } else {
-            console.log("Success", data.MessageId);
-            console.log('--SQS--->', data)
+            //console.log("Success", data.MessageId);
+            //console.log('--SQS--->', data)
         }
     });
 
