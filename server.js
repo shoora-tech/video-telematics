@@ -105,11 +105,13 @@ function handlerLotin(connection){
            deviceDataObj['gsmNetworkStrength'] = parseInt(data.slice(98, 102),16);
            deviceDataObj['numberofSatelite'] = parseInt(data.slice(124, 126),16);
 
+           console.log("JSON.stringify(deviceDataObj)",JSON.stringify(deviceDataObj))
            var params = {
             MessageBody: JSON.stringify(deviceDataObj),
             QueueUrl: queryURL
            };
-           
+
+           console.log("Testing ",JSON.stringify(params))
            sqs.sendMessage(params, function(err, data) {
             if (err) {
               console.log("Error", err);
@@ -119,6 +121,7 @@ function handlerLotin(connection){
            });
 
            let sqsData = await readFromSQS();
+           console.log("sqsData",sqsData)
             await insertSQSDataInDB(sqsData)
         }
      }
@@ -222,6 +225,24 @@ async function insertSQSDataInDB(data){
     try {
         await sequelize.authenticate();
         await sequelize.sync({alter: true})
+
+        console.log("alert_realtimedatabase",{
+            "uuid" : data.uuid ,
+            "identifier":data.identifier,
+            "location_packet_type": data.location_packet_type,
+            "message_body_length": data.message_body_length,
+            "imei":data.imei,
+            "message_serial_number":data.message_serial_number,
+            "alarm_series":data.alarm_series,
+            "terminal_status":data.terminal_status,
+            "ignition_status": data.ignition_status,
+            "latitude":data.latitute,
+            "longitude":data.longitute,
+            "height":data.height,
+            "speed":data.speed,
+            "directions":data.direction,
+            "oraganization":"oraganization"
+        })
 
         const resultData = await Device.create({
             "uuid" : data.uuid ,
