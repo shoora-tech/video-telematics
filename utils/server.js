@@ -35,12 +35,12 @@ function handlerLotin(connection){
         if(parseInt(data.slice(2, 4),16) == 2){
             deviceDataObj['uuid'] = randomUUID();
             deviceDataObj['identifier'] = data.slice(0, 2);
-           deviceDataObj['location_packet_type'] = parseInt(data.slice(2, 4),16);
-           deviceDataObj['message_body_length'] = data.slice(4, 10);
-           deviceDataObj['imei'] = data.slice(10, 22);
-           deviceDataObj['message_serial_number'] = data.slice(22, 26);
-           deviceDataObj['alarm_series'] = utils.getAlarmSeriesDet(data.slice(26, 34));
-           deviceDataObj['terminal_status'] = utils.getTerminalStatus(data.slice(34, 42));
+           deviceDataObj['locationPacketType'] = parseInt(data.slice(2, 4),16);
+           deviceDataObj['messageBodyLength'] = data.slice(4, 10);
+           deviceDataObj['phoneNumber'] = data.slice(10, 22);
+           deviceDataObj['msgSerialNumber'] = data.slice(22, 26);
+           deviceDataObj['alarmSeries'] = utils.getAlarmSeriesDet(data.slice(26, 34));
+           deviceDataObj['terminalStatus'] = utils.getTerminalStatus(data.slice(34, 42));
            deviceDataObj['latitute'] = parseInt(data.slice(42, 50),16)/1000000;
            deviceDataObj['longitute'] = parseInt(data.slice(50, 58),16)/1000000;
            deviceDataObj['height'] = parseInt(data.slice(58, 62),16);

@@ -58,14 +58,14 @@ function handlerLotin(connection){
         if(parseInt(data.slice(2, 4),16) == 2){
            deviceDataObj['uuid'] = randomUUID();
            deviceDataObj['identifier'] = data.slice(0, 2);
-           deviceDataObj['location_packet_type'] = parseInt(data.slice(2, 4),16);
-           deviceDataObj['message_body_length'] = data.slice(4, 10);
-           deviceDataObj['imei'] = data.slice(10, 22);
-           deviceDataObj['message_serial_number'] = data.slice(22, 26);
-           deviceDataObj['alarm_series'] = data.slice(26, 34);
-           deviceDataObj['terminal_status'] = data.slice(34, 42);
-           let terminalStatus = utils.Hex2Bin(deviceDataObj['terminal_status']);
-           deviceDataObj['ignition_status'] = parseInt(terminalStatus.slice(0, 1));
+           deviceDataObj['locationPacketType'] = parseInt(data.slice(2, 4),16);
+           deviceDataObj['messageBodyLength'] = data.slice(4, 10);
+           deviceDataObj['phoneNumber'] = data.slice(10, 22);
+           deviceDataObj['msgSerialNumber'] = data.slice(22, 26);
+           deviceDataObj['alarmSeries'] = data.slice(26, 34);
+           deviceDataObj['terminalStatus'] = data.slice(34, 42);
+           let terminalStatus = utils.Hex2Bin(deviceDataObj['terminalStatus']);
+           deviceDataObj['ignitionStatus'] = parseInt(terminalStatus.slice(0, 1));
            deviceDataObj['latitude'] = parseInt(terminalStatus.slice(2, 3));
            deviceDataObj['longitude'] = parseInt(terminalStatus.slice(3, 4));
            deviceDataObj['latitute'] = parseInt(data.slice(42, 50),16)/1000000;
@@ -227,39 +227,43 @@ async function insertSQSDataInDB(data){
         await sequelize.sync({alter: true})
 
         console.log("alert_realtimedatabase",{
-            "uuid" : data.uuid ,
+            "uuid" : randomUUID() ,
             "identifier":data.identifier,
-            "location_packet_type": data.location_packet_type,
-            "message_body_length": data.message_body_length,
-            "imei":data.imei,
-            "message_serial_number":data.message_serial_number,
-            "alarm_series":data.alarm_series,
-            "terminal_status":data.terminal_status,
-            "ignition_status": data.ignition_status,
+            "location_packet_type": data.locationPacketType,
+            "message_body_length": data.messageBodyLength,
+            "imei":data.phoneNumber,
+            "message_serial_number":data.msgSerialNumber,
+            "alarm_series":data.alarmSeries,
+            "terminal_status":data.terminalStatus,
+            "ignition_status": data.ignitionStatus,
             "latitude":data.latitute,
             "longitude":data.longitute,
             "height":data.height,
             "speed":data.speed,
             "directions":data.direction,
-            "oraganization":"oraganization"
+            "oraganization":"oraganization",
+            "created_at" : new Date(),
+            "updated_at" : new Date() ,
         })
 
         const resultData = await Device.create({
-            "uuid" : data.uuid ,
+            "uuid" : randomUUID() ,
             "identifier":data.identifier,
-            "location_packet_type": data.location_packet_type,
-            "message_body_length": data.message_body_length,
-            "imei":data.imei,
-            "message_serial_number":data.message_serial_number,
-            "alarm_series":data.alarm_series,
-            "terminal_status":data.terminal_status,
-            "ignition_status": data.ignition_status,
+            "location_packet_type": data.locationPacketType,
+            "message_body_length": data.messageBodyLength,
+            "imei":data.phoneNumber,
+            "message_serial_number":data.msgSerialNumber,
+            "alarm_series":data.alarmSeries,
+            "terminal_status":data.terminalStatus,
+            "ignition_status": data.ignitionStatus,
             "latitude":data.latitute,
             "longitude":data.longitute,
             "height":data.height,
             "speed":data.speed,
             "directions":data.direction,
-            "oraganization":"oraganization"
+            "oraganization":"oraganization",
+            "created_at" : new Date(),
+            "updated_at" : new Date() ,
         });
         return true;
 
