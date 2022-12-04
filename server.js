@@ -136,7 +136,7 @@ function handlerLotin(connection){
 
            let sqsData = await readFromSQS();
            console.log("sqsData",sqsData)
-            await insertSQSDataInDB(sqsData)
+            await insertSQSDataInDB(sqsData,deviceDataObj.uuid)
         }
      }
     }catch(e){
@@ -168,7 +168,7 @@ function readFromSQS(){
     })
 }
 
-async function insertSQSDataInDB(data) {
+async function insertSQSDataInDB(data,uuid) {
 
     try {
 
@@ -183,10 +183,10 @@ async function insertSQSDataInDB(data) {
                                                            message_serial_number, alarm_series, terminal_status,
                                                            ignition_status, latitude, longitude, height, speed,
                                                            direction, created_at, updated_at)
-                       VALUES ('${data.uuid}', ${data.locationPacketType}, '${data.messageBodyLength}',
+                       VALUES ('${uuid}', ${data.locationPacketType}, '${data.messageBodyLength}',
                                '${data.phoneNumber}', '${data.msgSerialNumber}', '${data.alarmSeries}',
-                               '${data.terminalStatus}', ${iStatus}, ${data.latitude}, ${data.longitude},
-                               ${data.height}, ${data.speed}, ${data.directions}, '${date}', '${date}')
+                               '${data.terminalStatus}', ${iStatus}, ${data.latitute}, ${data.ignitionStatus},
+                               ${data.height}, ${data.speed}, ${data.direction}, '${date}', '${date}')
         `;
 
 
