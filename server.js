@@ -4,6 +4,8 @@ var connectionArr = {};
 var id;
 var AWS = require('aws-sdk');
 const { resolve } = require("path");
+const { randomUUID } = require('crypto'); // Added in: node v14.17.0
+
 
 AWS.config.update({
     region: 'ap-south-1',
@@ -12,8 +14,10 @@ AWS.config.update({
     endpoint: new AWS.Endpoint('https://sqs.ap-south-1.amazonaws.com/'),
 });
 
+
 var sqs = new AWS.SQS();
 const queryURL = "https://sqs.ap-south-1.amazonaws.com/547686973061/video-telematics";
+
 var connectionArr = {};
 var tcpServer = net.createServer(handlerLotin).listen(1338);
 var deviceDataObj = {};
@@ -31,7 +35,7 @@ const {Sequelize, DataTypes} = require("sequelize");
 function handlerLotin(connection){
   console.log("connection ESTAB");
   tcpServer.getConnections(function (error, count) {
-        console.log("number of concurrent tcp connection " + count);
+        console.log("nspeedumber of concurrent tcp connection " + count);
   });
   connection.on('end', function () {
       console.log("server disconnected....");
@@ -51,22 +55,26 @@ function handlerLotin(connection){
         data = data.toString('hex');
       if(data.slice(0, 2).toLowerCase() == '7e' ){
         if(parseInt(data.slice(2, 4),16) == 2){
+           deviceDataObj['uuid'] = randomUUID();
            deviceDataObj['identifier'] = data.slice(0, 2);
-           deviceDataObj['locationPacketType'] = parseInt(data.slice(2, 4),16);
-           deviceDataObj['messageBodyLength'] = data.slice(4, 10);
-           deviceDataObj['phoneNumber'] = data.slice(10, 22);
-           deviceDataObj['msgSerialNumber'] = data.slice(22, 26);
-           deviceDataObj['alarmSeries'] = data.slice(26, 34);
-           deviceDataObj['terminalStatus'] = data.slice(34, 42);
-           let terminalStatus = utils.Hex2Bin(deviceDataObj['terminalStatus']);
-           deviceDataObj['ignitionStatus'] = parseInt(terminalStatus.slice(0, 1));
-           deviceDataObj['latituteposition'] = parseInt(terminalStatus.slice(2, 3));
-           deviceDataObj['longituteposition'] = parseInt(terminalStatus.slice(3, 4));
+           deviceDataObj['location_packet_type'] = parseInt(data.slice(2, 4),16);
+           deviceDataObj['message_body_length'] = data.slice(4, 10);
+           deviceDataObj['imei'] = data.slice(10, 22);
+           deviceDataObj['message_serial_number'] = data.slice(22, 26);
+           deviceDataObj['alarm_series'] = data.slice(26, 34);
+           deviceDataObj['terminal_status'] = data.slice(34, 42);
+           let terminalStatus = utils.Hex2Bin(deviceDataObj['terminal_status']);
+           deviceDataObj['ignition_status'] = parseInt(terminalStatus.slice(0, 1));
+           deviceDataObj['latitude'] = parseInt(terminalStatus.slice(2, 3));
+           deviceDataObj['longitude'] = parseInt(terminalStatus.slice(3, 4));
            deviceDataObj['latitute'] = parseInt(data.slice(42, 50),16)/1000000;
            deviceDataObj['longitute'] = parseInt(data.slice(50, 58),16)/1000000;
            deviceDataObj['height'] = parseInt(data.slice(58, 62),16);
            deviceDataObj['speed'] = parseInt(data.slice(62, 66),16)/10;
            deviceDataObj['direction'] = parseInt(data.slice(66, 70),16);
+           deviceDataObj['created_at'] = new Date() ;
+           deviceDataObj['updated_at'] = new Date() ;
+
            let timeString = data.slice(70, 82);
            var split = timeString.replace(/.{2}/g, '$&-').split('-');
            var date = '';
