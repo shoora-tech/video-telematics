@@ -27,9 +27,9 @@ const {Sequelize, DataTypes} = require("sequelize");
  const DB_DETAILS = {
      "database":"shoora_fleet_management",
      "username":"shoora",
-     "password":"A406bsNRtFBLne5wriIQ",
+     "password":"'u=4k)s&nen-&h#_3%_&+f#ieom(ztk$w)!#4azqruzofhavs99",
      "auth_type":"password authentication",
-     "endpoint": "shoora.crpd6o4smocv.ap-south-1.rds.amazonaws.com",
+     "endpoint": "shoorabackend.caaj1e4fnlaq.ap-south-1.rds.amazonaws.com",
      "port": "5432"
  }
 function handlerLotin(connection){
@@ -157,7 +157,7 @@ async function insertSQSDataInDB(data){
         dialect: 'postgres'
     });
 
-    const Device = sequelize.define('device_data_details', {
+    const Device = sequelize.define('alert_realtimedatabase', {
         // attributes
         id: {
             type: Sequelize.UUID,
@@ -224,14 +224,15 @@ async function insertSQSDataInDB(data){
         await sequelize.sync({alter: true})
 
         const resultData = await Device.create({
+            "uuid" : data.uuid ,
             "identifier":data.identifier,
-            "location_packet_type": data.locationPacketType,
-            "message_body_length": data.messageBodyLength,
-            "imei":data.phoneNumber,
-            "message_serial_number":data.msgSerialNumber,
-            "alarm_series":data.alarmSeries,
-            "terminal_status":data.terminalStatus,
-            "ignition_status": data.ignitionStatus,
+            "location_packet_type": data.location_packet_type,
+            "message_body_length": data.message_body_length,
+            "imei":data.imei,
+            "message_serial_number":data.message_serial_number,
+            "alarm_series":data.alarm_series,
+            "terminal_status":data.terminal_status,
+            "ignition_status": data.ignition_status,
             "latitude":data.latitute,
             "longitude":data.longitute,
             "height":data.height,
