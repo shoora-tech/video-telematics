@@ -4,6 +4,7 @@ var connectionArr = {};
 var id;
 var connectionArr = {};
 var tcpServer = net.createServer(handlerLotin).listen(1338);
+const { randomUUID } = require('crypto'); // Added in: node v14.17.0
 
 function handlerLotin(connection){
   console.log("connection ESTAB");
@@ -32,18 +33,21 @@ function handlerLotin(connection){
       var deviceDataObj = {};
       if(data.slice(0, 2).toLowerCase() == '7e' ){
         if(parseInt(data.slice(2, 4),16) == 2){
-           deviceDataObj['identifier'] = data.slice(0, 2);
-           deviceDataObj['locationPacketType'] = parseInt(data.slice(2, 4),16);
-           deviceDataObj['messageBodyLength'] = data.slice(4, 10);
-           deviceDataObj['phoneNumber'] = data.slice(10, 22);
-           deviceDataObj['msgSerialNumber'] = data.slice(22, 26);
-           deviceDataObj['alarms'] = utils.getAlarmSeriesDet(data.slice(26, 34));
-           deviceDataObj['terminalStatus'] = utils.getTerminalStatus(data.slice(34, 42));
+            deviceDataObj['uuid'] = randomUUID();
+            deviceDataObj['identifier'] = data.slice(0, 2);
+           deviceDataObj['location_packet_type'] = parseInt(data.slice(2, 4),16);
+           deviceDataObj['message_body_length'] = data.slice(4, 10);
+           deviceDataObj['imei'] = data.slice(10, 22);
+           deviceDataObj['message_serial_number'] = data.slice(22, 26);
+           deviceDataObj['alarm_series'] = utils.getAlarmSeriesDet(data.slice(26, 34));
+           deviceDataObj['terminal_status'] = utils.getTerminalStatus(data.slice(34, 42));
            deviceDataObj['latitute'] = parseInt(data.slice(42, 50),16)/1000000;
            deviceDataObj['longitute'] = parseInt(data.slice(50, 58),16)/1000000;
            deviceDataObj['height'] = parseInt(data.slice(58, 62),16);
            deviceDataObj['speed'] = parseInt(data.slice(62, 66),16)/10;
            deviceDataObj['direction'] = parseInt(data.slice(66, 70),16);
+            deviceDataObj['created_at'] = new Date() ;
+            deviceDataObj['updated_at'] = new Date() ;
            let timeString = data.slice(70, 82);
            var split = timeString.replace(/.{2}/g, '$&-').split('-');
            var date = '';
