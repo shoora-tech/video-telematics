@@ -27,7 +27,7 @@ const {Sequelize, DataTypes} = require("sequelize");
  const DB_DETAILS = {
      "database":"shoora_fleet_management",
      "username":"shoora",
-     "password":"'u=4k)s&nen-&h#_3%_&+f#ieom(ztk$w)!#4azqruzofhavs99",
+     "password":"u=4k)s&nen-&h#_3%_&+f#ieom(ztk$w)!#4azqruzofhavs99",
      "auth_type":"password authentication",
      "endpoint": "shoorabackend.caaj1e4fnlaq.ap-south-1.rds.amazonaws.com",
      "port": "5432"
