@@ -125,7 +125,7 @@ function handlerLotin(connection){
             QueueUrl: queryURL
            };
 
-           console.log("Testing ",JSON.stringify(params))
+           //console.log("Testing ",JSON.stringify(params))
            sqs.sendMessage(params, function(err, data) {
             if (err) {
               console.log("Error", err);
@@ -135,7 +135,7 @@ function handlerLotin(connection){
            });
 
            let sqsData = await readFromSQS();
-           console.log("sqsData",sqsData)
+           //console.log("sqsData",sqsData)
             await insertSQSDataInDB(sqsData,deviceDataObj.uuid)
         }
      }
@@ -190,11 +190,11 @@ async function insertSQSDataInDB(data,uuid) {
         `;
 
 
-        console.log(query)
+        //console.log(query)
 
         client.query(query, (err, res) => {
             if (err) {
-                console.error(err);
+                //console.error(err);
                 return;
             }
             console.log('Data insert successful');
