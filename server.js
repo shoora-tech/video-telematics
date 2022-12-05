@@ -119,7 +119,7 @@ function handlerLotin(connection){
            deviceDataObj['gsmNetworkStrength'] = parseInt(data.slice(98, 102),16);
            deviceDataObj['numberofSatelite'] = parseInt(data.slice(124, 126),16);
 
-           console.log("JSON.stringify(deviceDataObj)",JSON.stringify(deviceDataObj))
+           //console.log("JSON.stringify(deviceDataObj)",JSON.stringify(deviceDataObj))
            var params = {
             MessageBody: JSON.stringify(deviceDataObj),
             QueueUrl: queryURL
