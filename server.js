@@ -68,7 +68,7 @@ function handlerLotin(connection){
     try{
         console.log('data before hex conversion',data);
         data = data.toString('hex');
-        console.log('Data from device--->',data);
+        //console.log('Data from device--->',data);
       if(data.slice(0, 2).toLowerCase() == '7e' ){
         if(parseInt(data.slice(2, 4),16) == 2){
            deviceDataObj['uuid'] = randomUUID();
