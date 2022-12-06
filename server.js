@@ -6,6 +6,7 @@ var AWS = require('aws-sdk');
 const { resolve } = require("path");
 const { randomUUID } = require('crypto'); // Added in: node v14.17.0
 
+console.log("starting ....")
 
 AWS.config.update({
     region: 'ap-south-1',
