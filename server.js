@@ -19,7 +19,7 @@ var sqs = new AWS.SQS();
 const queryURL = "https://sqs.ap-south-1.amazonaws.com/547686973061/video-telematics";
 
 var connectionArr = {};
-var tcpServer = net.createServer(handlerLotin).listen(1338);
+var tcpServer = net.createServer(handlerLotin).listen(1339);
 var deviceDataObj = {};
 
 const sequelize = require('sequelize')
@@ -66,6 +66,8 @@ function handlerLotin(connection){
   connection.on('data',async function (data) {
     // data = "7e02000038784087664106013c00000000000c000101b02fbb048bd2aa00ee0000000022110614335701040001a33b01040001a33b03020000300199310106250400000000537e";
     try{
+	console.log(connection);
+	//console.log('DATA ' + connection.remoteAddress + ': ' + data);
         console.log('data before hex conversion',data);
         data = data.toString('hex');
         //console.log('Data from device--->',data);
