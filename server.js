@@ -66,11 +66,11 @@ function handlerLotin(connection){
   connection.on('data',async function (data) {
     // data = "7e02000038784087664106013c00000000000c000101b02fbb048bd2aa00ee0000000022110614335701040001a33b01040001a33b03020000300199310106250400000000537e";
     try{
-	console.log(connection);
+	//console.log(connection);
 	//console.log('DATA ' + connection.remoteAddress + ': ' + data);
-        console.log('data before hex conversion',data);
+        //console.log('data before hex conversion',data);
         data = data.toString('hex');
-        //console.log('Data from device--->',data);
+        console.log('Data from device--->',data);
       if(data.slice(0, 2).toLowerCase() == '7e' ){
         if(parseInt(data.slice(2, 4),16) == 2){
            deviceDataObj['uuid'] = randomUUID();
@@ -81,12 +81,30 @@ function handlerLotin(connection){
            deviceDataObj['msgSerialNumber'] = data.slice(22, 26);
            deviceDataObj['alarmSeries'] = data.slice(26, 34);
            deviceDataObj['terminalStatus'] = data.slice(34, 42);
-           let terminalStatus = utils.Hex2Bin(deviceDataObj['terminalStatus']);
-           deviceDataObj['ignitionStatus'] = parseInt(terminalStatus.slice(0, 1));
-           deviceDataObj['latitude'] = parseInt(terminalStatus.slice(2, 3));
-           deviceDataObj['longitude'] = parseInt(terminalStatus.slice(3, 4));
-           deviceDataObj['latitute'] = parseInt(data.slice(42, 50),16)/1000000;
-           deviceDataObj['longitute'] = parseInt(data.slice(50, 58),16)/1000000;
+           //console.log('terminal status',deviceDataObj['terminalStatus']);
+	   let terminalStatus = utils.Hex2BinStr(deviceDataObj['terminalStatus']);
+           //console.log(terminalStatus.length);
+           //console.log('terminal status',terminalStatus);
+	   //console.log('Anubhaw',terminalStatus.slice(9, 10))
+	   deviceDataObj['ignitionStatus'] = parseInt(terminalStatus.slice(9, 10));
+           deviceDataObj['latitude_d'] = parseInt(terminalStatus.slice(2, 3));
+	   //console.log("ignition status is -> ", deviceDataObj['ignitionStatus'])
+           deviceDataObj['longitude_d'] = parseInt(terminalStatus.slice(3, 4));
+	   if(deviceDataObj['latitude_d'] == 0){
+	      deviceDataObj['latitute'] = (parseInt(data.slice(42, 50),16)/1000000).toString();
+	   }else{
+	      deviceDataObj['latitute'] = (0 - parseInt(data.slice(42, 50),16)/1000000).toString();
+	   }
+
+	   if(deviceDataObj['latitude_d'] == 0){
+		deviceDataObj['longitute'] = (parseInt(data.slice(50, 58),16)/1000000).toString();
+	   }else{
+		deviceDataObj['longitute'] = (0 - parseInt(data.slice(50, 58),16)/1000000).toString();
+	   }
+
+
+           //deviceDataObj['latitute'] = parseInt(data.slice(42, 50),16)/1000000;
+           //deviceDataObj['longitute'] = parseInt(data.slice(50, 58),16)/1000000;
            deviceDataObj['height'] = parseInt(data.slice(58, 62),16);
            deviceDataObj['speed'] = parseInt(data.slice(62, 66),16)/10;
            deviceDataObj['direction'] = parseInt(data.slice(66, 70),16);
@@ -122,24 +140,24 @@ function handlerLotin(connection){
            deviceDataObj['gsmNetworkStrength'] = parseInt(data.slice(98, 102),16);
            deviceDataObj['numberofSatelite'] = parseInt(data.slice(124, 126),16);
 
-           //console.log("JSON.stringify(deviceDataObj)",JSON.stringify(deviceDataObj))
+           console.log("JSON.stringify(deviceDataObj)",deviceDataObj);
            var params = {
             MessageBody: JSON.stringify(deviceDataObj),
             QueueUrl: queryURL
            };
 
            //console.log("Testing ",JSON.stringify(params))
-           sqs.sendMessage(params, function(err, data) {
+           /*sqs.sendMessage(params, function(err, data) {
             if (err) {
               console.log("Error", err);
             } else {
               
             }
-           });
+           });*/
 
-           let sqsData = await readFromSQS();
+           //let sqsData = await readFromSQS();
            //console.log("sqsData",sqsData)
-            await insertSQSDataInDB(sqsData,deviceDataObj.uuid)
+            await insertSQSDataInDB(deviceDataObj,deviceDataObj.uuid)
         }
      }
     }catch(e){
@@ -181,6 +199,7 @@ async function insertSQSDataInDB(data,uuid) {
         }else {
             var iStatus = false
         }
+	console.log(data);
         var date = new Date().toISOString().slice(0, 19).replace('T', ' ');
         const query = `INSERT INTO alert_realtimedatabase (uuid, location_packet_type, message_body_length, imei,
                                                            message_serial_number, alarm_series, terminal_status,
@@ -188,16 +207,16 @@ async function insertSQSDataInDB(data,uuid) {
                                                            direction, created_at, updated_at)
                        VALUES ('${uuid}', ${data.locationPacketType}, '${data.messageBodyLength}',
                                '${data.phoneNumber}', '${data.msgSerialNumber}', '${data.alarmSeries}',
-                               '${data.terminalStatus}', ${iStatus}, ${data.latitute}, ${data.ignitionStatus},
+                               '${data.terminalStatus}', ${iStatus}, ${data.latitute}, ${data.longitute},
                                ${data.height}, ${data.speed}, ${data.direction}, '${date}', '${date}')
         `;
 
 
-        //console.log(query)
+        console.log(query)
 
         client.query(query, (err, res) => {
             if (err) {
-                //console.error(err);
+                console.error(err);
                 return;
             }
             console.log('Data insert successful');

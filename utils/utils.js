@@ -4,6 +4,20 @@ var Hex2Bin = function (n) {
     return parseInt(n, 16).toString(2);
 }
 
+var Hex2BinStr = function (hex) {
+    var binary = "";
+    var remainingSize = hex.length;
+    for (var p = 0; p < hex.length/8; p++) {
+        //In case remaining hex length (or initial) is not multiple of 8
+        var blockSize = remainingSize < 8 ? remainingSize  : 8;
+
+        binary += parseInt(hex.substr(p * 8, blockSize), 16).toString(2).padStart(blockSize*4,"0");
+
+        remainingSize -= blockSize;
+    }
+    return binary;
+}
+
 var checkHex = function (n) {
     return /^[0-9A-Fa-f]{1,64}$/.test(n);
 }
@@ -64,3 +78,4 @@ module.exports.Hex2Bin = Hex2Bin;
 module.exports.checkHex = checkHex;
 module.exports.getAlarmSeriesDet = getAlarmSeriesDet;
 module.exports.getTerminalStatus = getTerminalStatus;
+module.exports.Hex2BinStr = Hex2BinStr;
